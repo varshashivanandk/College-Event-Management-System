@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events – CEMS</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><div class="logo-dot"></div><div>CEMS<span>.rvu</span></div></a>
+  <div class="nav-links">
+    <a href="events.html" class="active">Events</a>
+    <a href="index.html#features">Features</a>
+    <a href="login.html">Sign In</a>
+    <a href="register.html" class="nav-cta">Get Started →</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb"><a href="index.html">Home</a> → Events</div>
+  <h1>Campus Events</h1>
+  <p>Discover, register, and attend everything happening at RV University.</p>
+</div>
+
+<div class="filters-bar">
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" placeholder="Search events…" id="searchInput" oninput="filterCards()">
+  </div>
+  <button class="filter-chip active" onclick="setFilter(this,'all')">All Events</button>
+  <button class="filter-chip" onclick="setFilter(this,'tech')">Tech</button>
+  <button class="filter-chip" onclick="setFilter(this,'cultural')">Cultural</button>
+  <button class="filter-chip" onclick="setFilter(this,'sports')">Sports</button>
+  <button class="filter-chip" onclick="setFilter(this,'workshop')">Workshop</button>
+</div>
+
+<div class="featured-wrap">
+  <div class="featured-event">
+    <div>
+      <div class="feat-category">🏆 Technical</div>
+      <h2>National Level Hackathon 2026</h2>
+      <div class="feat-meta">
+        <span>📅 <strong>March 15, 2026</strong></span>
+        <span>🕐 <strong>9:00 AM – 9:00 PM</strong></span>
+        <span>📍 <strong>Innovation Lab, Block C</strong></span>
+      </div>
+      <p style="font-size:0.88rem;color:rgba(245,243,238,0.6);margin-bottom:1.5rem;max-width:500px;line-height:1.7">
+        Build, innovate, and compete in a 12-hour hackathon. Open to all CSE, ISE, and ECE students. Form teams of 2–4 and create solutions for real-world problems.
+      </p>
+      <a href="register.html" class="btn-register">Register Now →</a>
+    </div>
+    <div class="feat-spots">
+      <div class="big-num">34</div>
+      <div class="spots-label">spots remaining</div>
+    </div>
+  </div>
+</div>
+
+<section class="events-section">
+  <div class="section-title">
+    Upcoming Events <span class="count-badge" id="eventCount">8 events</span>
+  </div>
+  <div class="events-grid" id="eventsGrid">
+
+    <div class="event-card" data-category="cultural">
+      <div class="card-top">
+        <span class="card-category cat-cultural">Cultural</span>
+        <h3>Rhythm &amp; Roots — Annual Cultural Fest</h3>
+        <p class="event-desc">Celebrate diversity through music, dance, art, and food at our biggest cultural event of the year.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Mar 22, 2026</strong></span><span>📍 <strong>Open Amphitheatre</strong></span></div>
+        <a href="register.html" class="card-action">Register</a>
+      </div>
+    </div>
+
+    <div class="event-card" data-category="tech">
+      <div class="card-top">
+        <span class="card-category cat-tech">Tech</span>
+        <h3>Web Dev Bootcamp — Full Stack Crash Course</h3>
+        <p class="event-desc">A hands-on 2-day bootcamp covering React, Node.js, and deployment. Beginner-friendly.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Mar 18, 2026</strong></span><span>📍 <strong>Computer Lab 3</strong></span></div>
+        <a href="register.html" class="card-action">Register</a>
+      </div>
+    </div>
+
+    <div class="event-card" data-category="sports">
+      <div class="card-top">
+        <span class="card-category cat-sports">Sports</span>
+        <h3>Inter-Department Cricket Tournament</h3>
+        <p class="event-desc">The annual cricket showdown between departments. Register your team and compete for the trophy.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Apr 5, 2026</strong></span><span>📍 <strong>Sports Ground</strong></span></div>
+        <a href="register.html" class="card-action">Register</a>
+      </div>
+    </div>
+
+    <div class="event-card" data-category="workshop">
+      <div class="card-top">
+        <span class="card-category cat-workshop">Workshop</span>
+        <h3>Machine Learning with Python — Workshop</h3>
+        <p class="event-desc">Learn the fundamentals of ML, build your first model, and understand data pipelines in one session.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Mar 25, 2026</strong></span><span>📍 <strong>Seminar Hall B</strong></span></div>
+        <span class="full-badge">🔴 Full</span>
+      </div>
+    </div>
+
+    <div class="event-card" data-category="tech">
+      <div class="card-top">
+        <span class="card-category cat-tech">Tech</span>
+        <h3>Cloud Computing &amp; DevOps Seminar</h3>
+        <p class="event-desc">Industry experts talk CI/CD pipelines, Docker, Kubernetes, and cloud careers. Don't miss it.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Apr 2, 2026</strong></span><span>📍 <strong>Auditorium A</strong></span></div>
+        <a href="register.html" class="card-action">Register</a>
+      </div>
+    </div>
+
+    <div class="event-card" data-category="cultural">
+      <div class="card-top">
+        <span class="card-category cat-cultural">Cultural</span>
+        <h3>Photography Exhibition — "Frames of Campus Life"</h3>
+        <p class="event-desc">Submit your best photographs and have them displayed in the college gallery for a week.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Apr 10, 2026</strong></span><span>📍 <strong>Gallery Hall</strong></span></div>
+        <a href="register.html" class="card-action">Register</a>
+      </div>
+    </div>
+
+    <div class="event-card" data-category="workshop">
+      <div class="card-top">
+        <span class="card-category cat-workshop">Workshop</span>
+        <h3>Resume &amp; LinkedIn Masterclass</h3>
+        <p class="event-desc">Placement cell hosts a session on crafting standout resumes and optimizing LinkedIn profiles for recruiters.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Apr 8, 2026</strong></span><span>📍 <strong>Seminar Hall A</strong></span></div>
+        <a href="register.html" class="card-action">Register</a>
+      </div>
+    </div>
+
+    <div class="event-card" data-category="sports">
+      <div class="card-top">
+        <span class="card-category cat-sports">Sports</span>
+        <h3>Table Tennis Open Championship</h3>
+        <p class="event-desc">Singles and doubles table tennis competition open to all students. Prizes for top 3 in each category.</p>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-bottom">
+        <div class="card-meta"><span>📅 <strong>Apr 12, 2026</strong></span><span>📍 <strong>Indoor Sports Complex</strong></span></div>
+        <a href="register.html" class="card-action">Register</a>
+      </div>
+    </div>
+
+  </div>
+  <div class="load-more-wrap">
+    <button class="btn-load-more">Load More Events</button>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">CEMS<span>.rvu</span></div>
+  <div>College Event Management System · &copy; 2026</div>
+  <div> RV University, Bengaluru </div>
+</footer>
+
+<script>
+  let activeFilter = 'all';
+  function setFilter(btn, cat) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = cat;
+    filterCards();
+  }
+  function filterCards() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.event-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const matchCat = activeFilter === 'all' || card.dataset.category === activeFilter;
+      const matchSearch = card.innerText.toLowerCase().includes(query);
+      card.style.display = (matchCat && matchSearch) ? '' : 'none';
+      if (matchCat && matchSearch) visible++;
+    });
+    document.getElementById('eventCount').textContent = visible + ' event' + (visible !== 1 ? 's' : '');
+  }
+</script>
+</body>
+</html>
