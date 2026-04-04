@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Event – CEMS</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .ce-page {
+    min-height: 100vh;
+    padding: 7rem 2.5rem 4rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem; }
+  .breadcrumb a { color: var(--accent); text-decoration: none; }
+  .page-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.4rem;
+  }
+  .page-sub { font-size: 0.95rem; color: var(--muted); margin-bottom: 2.5rem; }
+
+  /* Form sections */
+  .form-section {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 18px; padding: 2rem; margin-bottom: 1.2rem;
+  }
+  .form-section-title {
+    font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent); margin-bottom: 1.4rem;
+  }
+  .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+
+  .field textarea {
+    width: 100%; background: var(--input-bg); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 0.8rem 1rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.93rem; color: var(--ink);
+    outline: none; resize: vertical; min-height: 100px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,77,46,0.08); }
+  .field textarea::placeholder { color: var(--muted); }
+
+  /* Live preview */
+  .preview-section { margin-bottom: 1.2rem; }
+  .preview-label {
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.8rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .preview-label::after { content: '— updates as you type'; font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+  .preview-card {
+    background: var(--ink); color: var(--paper);
+    border-radius: 16px; padding: 1.5rem 1.8rem;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .preview-cat {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.5rem;
+  }
+  .preview-card h3 {
+    font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800;
+    margin-bottom: 0.7rem; line-height: 1.25; letter-spacing: -0.01em;
+    color: rgba(245,243,238,0.4);
+  }
+  .preview-card h3.has-value { color: var(--paper); }
+  .preview-meta { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+  .preview-meta span { font-size: 0.8rem; color: rgba(245,243,238,0.5); }
+  .preview-meta strong { color: rgba(245,243,238,0.8); font-weight: 500; }
+  .preview-desc {
+    font-size: 0.83rem; color: rgba(245,243,238,0.5); line-height: 1.6;
+    font-style: italic;
+  }
+  .preview-desc.has-value { font-style: normal; color: rgba(245,243,238,0.6); }
+
+  /* Buttons */
+  .btn-ce-submit {
+    width: 100%; background: var(--accent); color: #fff; border: none;
+    border-radius: 12px; padding: 1rem;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+  .btn-ce-submit:hover { background: #e03d20; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,77,46,0.35); }
+  .btn-ce-submit:disabled { background: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Status messages */
+  .msg {
+    border-radius: 10px; padding: 0.9rem 1.1rem;
+    font-size: 0.88rem; font-weight: 500; margin-top: 1rem;
+    display: none; align-items: center; gap: 0.6rem; line-height: 1.5;
+  }
+  .msg.success { background: rgba(0,200,83,0.1);  border: 1px solid rgba(0,200,83,0.3);  color: #00963e; }
+  .msg.error   { background: rgba(244,67,54,0.08); border: 1px solid rgba(244,67,54,0.2); color: #c62828; }
+
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.85rem; color: var(--muted); text-decoration: none;
+    margin-top: 1.5rem; transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--ink); }
+
+  @media (max-width: 700px) {
+    .ce-page { padding: 6rem 1.25rem 3rem; }
+    .field-row-2, .field-row-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><div class="logo-dot"></div><div>CEMS<span>.rvu</span></div></a>
+  <div class="nav-links">
+    <a href="events.html">Events</a>
+    <a href="index.html#features">Features</a>
+    <a href="create-event.html" class="active">+ Create Event</a>
+    <a href="login.html">Sign In</a>
+    <a href="register.html" class="nav-cta">Get Started →</a>
+  </div>
+</nav>
+
+<div class="ce-page">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a> → <a href="events.html">Events</a> → Create Event
+  </div>
+
+  <h1 class="page-title">Create a New Event</h1>
+  <p class="page-sub">Fill in the details below. Your event will be submitted for faculty approval before going live.</p>
+
+  <!-- Live preview -->
+  <div class="preview-section">
+    <div class="preview-label">Event preview</div>
+    <div class="preview-card">
+      <div class="preview-cat" id="prevCat">Category</div>
+      <h3 id="prevTitle" class="">Event title will appear here…</h3>
+      <div class="preview-meta">
+        <span>📅 <strong id="prevDate">Date</strong></span>
+        <span>🕐 <strong id="prevTime">Time</strong></span>
+        <span>📍 <strong id="prevVenue">Venue</strong></span>
+      </div>
+      <div class="preview-desc" id="prevDesc">Description will appear here…</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Basic info -->
+  <div class="form-section">
+    <div class="form-section-title">📌 Event Details</div>
+
+    <div class="field">
+      <label>Event Title</label>
+      <input type="text" id="evTitle" placeholder="e.g. Annual Tech Symposium 2026"
+        oninput="updatePreview()">
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea id="evDesc" placeholder="Describe your event — what it's about, who should attend, what to expect…"
+        oninput="updatePreview()"></textarea>
+    </div>
+
+    <div class="field-row-2">
+      <div class="field">
+        <label>Category</label>
+        <select id="evCat" onchange="updatePreview()">
+          <option value="">Select category</option>
+          <option value="Technical">Technical</option>
+          <option value="Cultural">Cultural</option>
+          <option value="Sports">Sports</option>
+          <option value="Workshop">Workshop</option>
+          <option value="Seminar">Seminar</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Max Participants</label>
+        <input type="number" id="evMax" placeholder="e.g. 100" min="1">
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Date, Time, Venue -->
+  <div class="form-section">
+    <div class="form-section-title">📅 Date, Time & Venue</div>
+    <div class="field-row-3">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="evDate" onchange="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Start Time</label>
+        <input type="time" id="evTimeStart" onchange="updatePreview()">
+      </div>
+      <div class="field">
+        <label>End Time</label>
+        <input type="time" id="evTimeEnd" onchange="updatePreview()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Venue / Location</label>
+      <input type="text" id="evVenue" placeholder="e.g. Auditorium A, Block B" oninput="updatePreview()">
+    </div>
+  </div>
+
+  <!-- Section 3: Coordinator info -->
+  <div class="form-section">
+    <div class="form-section-title">👤 Coordinator Details</div>
+    <div class="field-row-2">
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" id="coordName" placeholder="Full name">
+      </div>
+      <div class="field">
+        <label>USN / Employee ID</label>
+        <input type="text" id="coordUsn" placeholder="e.g. 1RUA24CSE0516">
+      </div>
+    </div>
+    <div class="field">
+      <label>Contact Email</label>
+      <input type="email" id="coordEmail" placeholder="your@rvu.edu.in">
+    </div>
+    <div class="field">
+      <label>Program</label>
+      <select id="coordDept">
+        <option value="">Select Program</option>
+        <option>BTech</option><option>BSc</option><option>BBA</option>
+        <option>BCOM</option><option>BDes</option><option>MBA</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <button class="btn-ce-submit" id="submitBtn" onclick="submitEvent()">
+    <div class="spinner" id="spinner"></div>
+    <span id="btnText">Submit for Approval →</span>
+  </button>
+
+  <div class="msg success" id="msgSuccess">
+    ✅ Event submitted! It will go live after faculty approval.
+  </div>
+  <div class="msg error" id="msgError">
+    ❌ <span id="errorText">Something went wrong. Please try again.</span>
+  </div>
+
+  <a href="events.html" class="back-link">← Back to events</a>
+</div>
+
+<footer>
+  <div class="footer-logo">CEMS<span>.rvu</span></div>
+  <div>College Event Management System · © 2026</div>
+  <div>RV University, Bengaluru</div>
+</footer>
+
+<script>
+  // ── Live preview ───────────────────────────────────────────────────────────
+  function updatePreview() {
+    const title   = document.getElementById('evTitle').value.trim();
+    const desc    = document.getElementById('evDesc').value.trim();
+    const cat     = document.getElementById('evCat').value;
+    const dateVal = document.getElementById('evDate').value;
+    const tStart  = document.getElementById('evTimeStart').value;
+    const tEnd    = document.getElementById('evTimeEnd').value;
+    const venue   = document.getElementById('evVenue').value.trim();
+
+    const prevTitle = document.getElementById('prevTitle');
+    const prevDesc  = document.getElementById('prevDesc');
+
+    document.getElementById('prevCat').textContent   = cat   || 'Category';
+    prevTitle.textContent = title || 'Event title will appear here…';
+    prevTitle.className   = title ? 'has-value' : '';
+    prevDesc.textContent  = desc  || 'Description will appear here…';
+    prevDesc.className    = 'preview-desc' + (desc ? ' has-value' : '');
+
+    // Format date nicely
+    if (dateVal) {
+      const d = new Date(dateVal + 'T00:00:00');
+      document.getElementById('prevDate').textContent = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+    } else {
+      document.getElementById('prevDate').textContent = 'Date';
+    }
+
+    // Format time
+    const fmtTime = t => {
+      if (!t) return '';
+      const [h, m] = t.split(':');
+      const hr = parseInt(h), suffix = hr >= 12 ? 'PM' : 'AM';
+      return ((hr % 12) || 12) + ':' + m + ' ' + suffix;
+    };
+    const timeStr = tStart ? (tEnd ? fmtTime(tStart) + ' – ' + fmtTime(tEnd) : fmtTime(tStart)) : 'Time';
+    document.getElementById('prevTime').textContent  = timeStr;
+    document.getElementById('prevVenue').textContent = venue || 'Venue';
+  }
+
+  // ── Submit event to backend ────────────────────────────────────────────────
+  // Expected backend route: POST /api/events
+  // Change port below to match your Express server.
+  const API_BASE = 'http://localhost:5000';
+
+  async function submitEvent() {
+    const title      = document.getElementById('evTitle').value.trim();
+    const desc       = document.getElementById('evDesc').value.trim();
+    const cat        = document.getElementById('evCat').value;
+    const maxP       = document.getElementById('evMax').value;
+    const date       = document.getElementById('evDate').value;
+    const timeStart  = document.getElementById('evTimeStart').value;
+    const timeEnd    = document.getElementById('evTimeEnd').value;
+    const venue      = document.getElementById('evVenue').value.trim();
+    const coordName  = document.getElementById('coordName').value.trim();
+    const coordUsn   = document.getElementById('coordUsn').value.trim();
+    const coordEmail = document.getElementById('coordEmail').value.trim();
+    const coordDept  = document.getElementById('coordDept').value;
+
+    // Validate required fields
+    const missing = [];
+    if (!title)      missing.push('Event Title');
+    if (!desc)       missing.push('Description');
+    if (!cat)        missing.push('Category');
+    if (!date)       missing.push('Date');
+    if (!timeStart)  missing.push('Start Time');
+    if (!venue)      missing.push('Venue');
+    if (!coordName)  missing.push('Your Name');
+    if (!coordEmail) missing.push('Contact Email');
+    if (!coordDept)  missing.push('Department');
+
+    if (missing.length) {
+      showMsg('error', 'Please fill in: ' + missing.join(', ') + '.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(coordEmail)) {
+      showMsg('error', 'Please enter a valid contact email address.');
+      return;
+    }
+
+    setLoading(true);
+    hideAllMsgs();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description: desc,
+          category: cat,
+          maxParticipants: maxP ? parseInt(maxP) : null,
+          date,
+          timeStart,
+          timeEnd,
+          venue,
+          coordinator: {
+            name: coordName,
+            usn: coordUsn,
+            email: coordEmail,
+            department: coordDept
+          },
+          status: 'pending'   // faculty approval required
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById('msgSuccess').style.display = 'flex';
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('btnText').textContent = 'Submitted ✓';
+        // Clear form
+        ['evTitle','evDesc','evMax','evDate','evTimeStart','evTimeEnd',
+         'evVenue','coordName','coordUsn','coordEmail'].forEach(id =>
+          document.getElementById(id).value = ''
+        );
+        document.getElementById('evCat').value = '';
+        document.getElementById('coordDept').value = '';
+        updatePreview();
+      } else {
+        showMsg('error', data.message || 'Submission failed. Please try again.');
+      }
+    } catch (err) {
+      showMsg('error', 'Cannot connect to server. Make sure the backend is running on port 5000.');
+    }
+
+    setLoading(false);
+  }
+
+  function setLoading(on) {
+    document.getElementById('spinner').style.display = on ? 'block' : 'none';
+    document.getElementById('btnText').style.display = on ? 'none'  : 'inline';
+    document.getElementById('submitBtn').disabled = on;
+  }
+
+  function hideAllMsgs() {
+    ['msgSuccess','msgError'].forEach(id =>
+      document.getElementById(id).style.display = 'none'
+    );
+  }
+
+  function showMsg(type, text) {
+    hideAllMsgs();
+    if (type === 'error') {
+      document.getElementById('errorText').textContent = text;
+      document.getElementById('msgError').style.display = 'flex';
+    }
+  }
+</script>
+</body>
+</html>
