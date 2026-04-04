@@ -86,13 +86,37 @@
     document.getElementById('pwToggle').textContent = pwVisible ? '🙈' : '👁️';
   }
   function handleLogin() {
-    const email = document.getElementById('emailInput').value.trim();
-    const pw = document.getElementById('passwordInput').value.trim();
-    if (!email || !pw) { alert('Please fill in your email/USN and password.'); return; }
-    const toast = document.getElementById('toast');
-    toast.style.display = 'block';
-    setTimeout(() => { window.location.href = 'events.html'; }, 1800);
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value.trim();
+
+  if (!email || !password) {
+    alert('Please fill in your email and password.');
+    return;
   }
+
+  // 🔥 API CALL
+  fetch("http://localhost:5000/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, password })
+  })
+  .then(res => res.text())
+  .then(data => {
+    alert(data);
+
+    if (data.includes("Successful")) {
+      const toast = document.getElementById('toast');
+      toast.style.display = 'block';
+
+      setTimeout(() => {
+        window.location.href = 'events.html';
+      }, 1500);
+    }
+  });
+}
+  
 </script>
 </body>
 </html>

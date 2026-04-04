@@ -200,18 +200,52 @@
   }
 
   function handleRegister() {
-    const pw1 = document.getElementById('pw1').value;
-    const pw2 = document.getElementById('pw2').value;
-    const terms = document.getElementById('terms').checked;
-    const errEl = document.getElementById('pwMatchErr');
-    if (pw1 !== pw2) { errEl.style.display = 'block'; return; }
-    errEl.style.display = 'none';
-    if (!terms) { alert('Please agree to the terms to continue.'); return; }
-    if (!pw1) { alert('Please set a password.'); return; }
-    document.getElementById('step2').style.display = 'none';
-    document.getElementById('stepsIndicator').style.display = 'none';
-    document.getElementById('successState').style.display = 'block';
+  const fname = document.getElementById('fname').value;
+  const lname = document.getElementById('lname').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('pw1').value;
+
+  const pw2 = document.getElementById('pw2').value;
+  const terms = document.getElementById('terms').checked;
+  const errEl = document.getElementById('pwMatchErr');
+
+  // validation
+  if (password !== pw2) {
+    errEl.style.display = 'block';
+    return;
   }
+  errEl.style.display = 'none';
+
+  if (!terms) {
+    alert('Please agree to the terms');
+    return;
+  }
+
+  const name = fname + " " + lname;
+
+  // 🔥 API CALL
+  fetch("http://localhost:5000/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      password: password
+    })
+  })
+  .then(res => res.text())
+  .then(data => {
+    alert(data);
+
+    if (data.includes("Successfully")) {
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('stepsIndicator').style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+    }
+  });
+}
 </script>
 </body>
 </html>

@@ -200,6 +200,42 @@
     });
     document.getElementById('eventCount').textContent = visible + ' event' + (visible !== 1 ? 's' : '');
   }
+  function loadEvents() {
+  fetch("http://localhost:5000/events")
+    .then(res => res.json())
+    .then(data => {
+      const grid = document.getElementById("eventsGrid");
+      grid.innerHTML = "";
+
+      data.forEach(event => {
+        const card = document.createElement("div");
+        card.className = "event-card";
+
+        card.innerHTML = `
+          <div class="card-top">
+            <span class="card-category cat-tech">Event</span>
+            <h3>${event.title}</h3>
+            <p class="event-desc">${event.description}</p>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-bottom">
+            <div class="card-meta">
+              <span>📅 <strong>${event.date}</strong></span>
+              <span>📍 <strong>${event.location}</strong></span>
+            </div>
+            <a href="#" class="card-action">Register</a>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      document.getElementById("eventCount").textContent = data.length + " events";
+    });
+}
+
+window.onload = loadEvents;
+window.onload = loadEvents;
 </script>
 </body>
 </html>
