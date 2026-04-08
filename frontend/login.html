@@ -89,6 +89,9 @@
     const email = document.getElementById('emailInput').value.trim();
     const pw = document.getElementById('passwordInput').value.trim();
     if (!email || !pw) { alert('Please fill in your email/USN and password.'); return; }
+    const selectedRole = document.querySelector('.role-btn.selected .role-name');
+    const role = selectedRole ? selectedRole.textContent.toLowerCase() : 'student';
+    sessionStorage.setItem('cemsRole', role);
     const toast = document.getElementById('toast');
     toast.style.display = 'block';
     setTimeout(() => { window.location.href = 'events.html'; }, 1800);

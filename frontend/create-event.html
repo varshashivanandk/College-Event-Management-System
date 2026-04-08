@@ -261,6 +261,18 @@
 </footer>
 
 <script>
+  // Redirect students/guests away from this page entirely
+  (function() {
+    const role = sessionStorage.getItem('cemsRole') || 'student';
+    if (role === 'student' || role === '') {
+      window.location.href = 'events.html';
+    }
+    // Also hide the link for students on other pages who somehow land here
+    const link = document.querySelector('.nav-links a[href="create-event.html"]');
+    if (link && (role === 'student' || role === '')) link.style.display = 'none';
+  })();
+</script>
+<script>
   // ── Live preview ───────────────────────────────────────────────────────────
   function updatePreview() {
     const title   = document.getElementById('evTitle').value.trim();

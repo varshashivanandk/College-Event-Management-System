@@ -166,6 +166,15 @@
 </footer>
 
 <script>
+  (function() {
+    const role = sessionStorage.getItem('cemsRole') || 'student';
+    if (role === 'student' || role === '') {
+      const link = document.querySelector('.nav-links a[href="create-event.html"]');
+      if (link) link.style.display = 'none';
+    }
+  })();
+</script>
+<script>
   // Read event info from URL query params
   const params     = new URLSearchParams(window.location.search);
   const eventId    = params.get('id')    || '';

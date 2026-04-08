@@ -182,6 +182,16 @@
 </footer>
 
 <script>
+  // Hide "+ Create Event" for students and unauthenticated users
+  (function() {
+    const role = sessionStorage.getItem('cemsRole') || 'student';
+    if (role === 'student' || role === '') {
+      const link = document.querySelector('.nav-links a[href="create-event.html"]');
+      if (link) link.style.display = 'none';
+    }
+  })();
+</script>
+<script>
   let activeFilter = 'all';
   function setFilter(btn, cat) {
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
