@@ -168,6 +168,7 @@
 </footer>
 
 <script>
+<<<<<<< HEAD
   document.addEventListener("DOMContentLoaded", () => {
     const params     = new URLSearchParams(window.location.search);
     const eventId    = params.get('eventId')    || '';
@@ -176,6 +177,25 @@
     const eventTime  = decodeURIComponent(params.get('time')  || '');
     const eventVenue = decodeURIComponent(params.get('venue') || '—');
     const eventCat   = decodeURIComponent(params.get('cat')   || 'Event');
+=======
+  (function() {
+    const role = sessionStorage.getItem('cemsRole') || 'student';
+    if (role === 'student' || role === '') {
+      const link = document.querySelector('.nav-links a[href="create-event.html"]');
+      if (link) link.style.display = 'none';
+    }
+  })();
+</script>
+<script>
+  // Read event info from URL query params
+  const params     = new URLSearchParams(window.location.search);
+  const eventId    = params.get('id')    || '';
+  const eventTitle = decodeURIComponent(params.get('title') || 'Event');
+  const eventDate  = decodeURIComponent(params.get('date')  || '—');
+  const eventTime  = decodeURIComponent(params.get('time')  || '');
+  const eventVenue = decodeURIComponent(params.get('venue') || '—');
+  const eventCat   = decodeURIComponent(params.get('cat')   || 'Event');
+>>>>>>> d8e48794a6b696a3c897d43fb2d5c4e78ae86c6b
 
     document.getElementById('evTitle').textContent = eventTitle;
     document.getElementById('evDate').textContent  = eventDate;

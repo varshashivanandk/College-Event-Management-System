@@ -86,12 +86,24 @@
     document.getElementById('pwToggle').textContent = pwVisible ? '🙈' : '👁️';
   }
   function handleLogin() {
+<<<<<<< HEAD
   const email = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passwordInput').value.trim();
 
   if (!email || !password) {
     alert('Please fill in your email and password.');
     return;
+=======
+    const email = document.getElementById('emailInput').value.trim();
+    const pw = document.getElementById('passwordInput').value.trim();
+    if (!email || !pw) { alert('Please fill in your email/USN and password.'); return; }
+    const selectedRole = document.querySelector('.role-btn.selected .role-name');
+    const role = selectedRole ? selectedRole.textContent.toLowerCase() : 'student';
+    sessionStorage.setItem('cemsRole', role);
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => { window.location.href = 'events.html'; }, 1800);
+>>>>>>> d8e48794a6b696a3c897d43fb2d5c4e78ae86c6b
   }
 
   // 🔥 API CALL
