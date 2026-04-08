@@ -319,77 +319,66 @@
     const coordEmail = document.getElementById('coordEmail').value.trim();
     const coordDept  = document.getElementById('coordDept').value;
 
-    // Validate required fields
-    const missing = [];
-    if (!title)      missing.push('Event Title');
-    if (!desc)       missing.push('Description');
-    if (!cat)        missing.push('Category');
-    if (!date)       missing.push('Date');
-    if (!timeStart)  missing.push('Start Time');
-    if (!venue)      missing.push('Venue');
-    if (!coordName)  missing.push('Your Name');
-    if (!coordEmail) missing.push('Contact Email');
-    if (!coordDept)  missing.push('Department');
-
-    if (missing.length) {
-      showMsg('error', 'Please fill in: ' + missing.join(', ') + '.');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(coordEmail)) {
-      showMsg('error', 'Please enter a valid contact email address.');
-      return;
-    }
+    console.log("Submitting event data:", {
+      title,
+      description: desc,
+      category: cat,
+      maxParticipants: maxP,
+      date,
+      timeStart,
+      timeEnd,
+      venue,
+      coordinator: {
+        name: coordName,
+        usn: coordUsn,
+        email: coordEmail,
+        department: coordDept
+      },
+      status: 'pending'
+    });
+    console.log("Venue field value:", venue);
 
     setLoading(true);
     hideAllMsgs();
 
     try {
-      const res = await fetch(`${API_BASE}/api/events`, {
+      const res = await fetch(`${API_BASE}/events`, {   // ✅ FIXED URL
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
           description: desc,
           category: cat,
-          maxParticipants: maxP ? parseInt(maxP) : null,
+          maxParticipants: maxP,
           date,
           timeStart,
           timeEnd,
-          venue,
+          location: venue, // Updated to send venue as location
           coordinator: {
             name: coordName,
             usn: coordUsn,
             email: coordEmail,
             department: coordDept
           },
-          status: 'pending'   // faculty approval required
+          status: 'pending'
         })
       });
 
-      const data = await res.json();
+      const data = await res.text();   // ✅ FIXED
 
       if (res.ok) {
         document.getElementById('msgSuccess').style.display = 'flex';
-        document.getElementById('submitBtn').disabled = true;
         document.getElementById('btnText').textContent = 'Submitted ✓';
-        // Clear form
-        ['evTitle','evDesc','evMax','evDate','evTimeStart','evTimeEnd',
-         'evVenue','coordName','coordUsn','coordEmail'].forEach(id =>
-          document.getElementById(id).value = ''
-        );
-        document.getElementById('evCat').value = '';
-        document.getElementById('coordDept').value = '';
-        updatePreview();
       } else {
-        showMsg('error', data.message || 'Submission failed. Please try again.');
+        showMsg('error', data);
       }
+
     } catch (err) {
-      showMsg('error', 'Cannot connect to server. Make sure the backend is running on port 5000.');
+      showMsg('error', 'Server not running ❌');
     }
 
     setLoading(false);
-  }
+}
 
   function setLoading(on) {
     document.getElementById('spinner').style.display = on ? 'block' : 'none';
@@ -410,6 +399,8 @@
       document.getElementById('msgError').style.display = 'flex';
     }
   }
+
+ 
 </script>
 </body>
 </html>

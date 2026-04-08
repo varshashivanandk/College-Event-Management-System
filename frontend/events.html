@@ -201,7 +201,7 @@
     });
     document.getElementById('eventCount').textContent = visible + ' event' + (visible !== 1 ? 's' : '');
   }
-  function loadEvents() {
+ function loadEvents() {
   fetch("http://localhost:5000/events")
     .then(res => res.json())
     .then(data => {
@@ -209,12 +209,18 @@
       grid.innerHTML = "";
 
       data.forEach(event => {
+
+        if (!event.title) return;
+
         const card = document.createElement("div");
         card.className = "event-card";
 
+        // ✅ IMPORTANT: add category for filtering
+        card.setAttribute("data-category", event.category?.toLowerCase() || "all");
+
         card.innerHTML = `
           <div class="card-top">
-            <span class="card-category cat-tech">Event</span>
+            <span class="card-category">${event.category || "Event"}</span>
             <h3>${event.title}</h3>
             <p class="event-desc">${event.description}</p>
           </div>
@@ -224,7 +230,7 @@
               <span>📅 <strong>${event.date}</strong></span>
               <span>📍 <strong>${event.location}</strong></span>
             </div>
-            <a href="#" class="card-action">Register</a>
+            <a href="event-register.html?eventId=${event._id}" class="card-action">Register</a>
           </div>
         `;
 
@@ -232,10 +238,13 @@
       });
 
       document.getElementById("eventCount").textContent = data.length + " events";
+    })
+    .catch(err => {
+      console.log(err);
+      alert("Error loading events");
     });
 }
 
-window.onload = loadEvents;
 window.onload = loadEvents;
 </script>
 </body>

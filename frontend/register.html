@@ -204,8 +204,13 @@
   const lname = document.getElementById('lname').value;
   const email = document.getElementById('email').value;
   const password = document.getElementById('pw1').value;
-
   const pw2 = document.getElementById('pw2').value;
+
+  const usn = document.getElementById('usn').value;
+  const dept = document.getElementById('dept').value;
+
+  const role = document.querySelector('.role-card.selected .rn').innerText;
+
   const terms = document.getElementById('terms').checked;
   const errEl = document.getElementById('pwMatchErr');
 
@@ -230,9 +235,14 @@
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
+      firstName: fname,
+      lastName: lname,
       name: name,
       email: email,
-      password: password
+      password: password,
+      role: role,
+      usn: usn,
+      department: dept
     })
   })
   .then(res => res.text())
@@ -244,6 +254,10 @@
       document.getElementById('stepsIndicator').style.display = 'none';
       document.getElementById('successState').style.display = 'block';
     }
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Something went wrong");
   });
 }
 </script>

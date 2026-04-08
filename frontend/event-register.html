@@ -115,41 +115,43 @@
     <h3>Confirm Your Registration</h3>
     <p class="form-sub">Fill in your details to secure your spot. You can only register once per event.</p>
 
-    <div class="field-row-2">
-      <div class="field"><label>First Name</label><input type="text" id="regFname" placeholder="FirstName"></div>
-      <div class="field"><label>Last Name</label><input type="text" id="regLname" placeholder="Last Name"></div>
-    </div>
-    <div class="field">
-      <label>USN / Roll Number</label>
-      <input type="text" id="regUsn" placeholder="e.g. 1RUA24CSE0516">
-    </div>
-    <div class="field">
-      <label>Email Address</label>
-      <input type="email" id="regEmail" placeholder="e.g. varsha@rvu.edu.in">
-    </div>
-    <div class="field-row-2">
-      <div class="field">
-        <label>Program</label>
-        <select id="regDept">
-          <option value="">Select Program</option>
-          <option>BTech</option><option>BSc</option><option>BBA</option>
-          <option>BCOM</option><option>BDes</option><option>MBA</option>
-        </select>
+    <form id="event-register-form">
+      <div class="field-row-2">
+        <div class="field"><label>First Name</label><input type="text" id="regFname" placeholder="FirstName"></div>
+        <div class="field"><label>Last Name</label><input type="text" id="regLname" placeholder="Last Name"></div>
       </div>
       <div class="field">
-        <label>Year of Study</label>
-        <select id="regYear">
-          <option value="">Select year</option>
-          <option>1st Year</option><option>2nd Year</option>
-          <option>3rd Year</option><option>4th Year</option>
-        </select>
+        <label>USN / Roll Number</label>
+        <input type="text" id="regUsn" placeholder="e.g. 1RUA24CSE0516">
       </div>
-    </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="regEmail" placeholder="e.g. varsha@rvu.edu.in">
+      </div>
+      <div class="field-row-2">
+        <div class="field">
+          <label>Program</label>
+          <select id="regDept">
+            <option value="">Select Program</option>
+            <option>BTech</option><option>BSc</option><option>BBA</option>
+            <option>BCOM</option><option>BDes</option><option>MBA</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Year of Study</label>
+          <select id="regYear">
+            <option value="">Select year</option>
+            <option>1st Year</option><option>2nd Year</option>
+            <option>3rd Year</option><option>4th Year</option>
+          </select>
+        </div>
+      </div>
 
-    <button class="btn-er-submit" id="submitBtn" onclick="submitRegistration()">
-      <div class="spinner" id="spinner"></div>
-      <span id="btnText">Confirm Registration →</span>
-    </button>
+      <button type="submit" class="btn-er-submit" id="submitBtn">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Confirm Registration →</span>
+      </button>
+    </form>
 
     <div class="msg success" id="msgSuccess">✅ You're registered! We'll see you at the event.</div>
     <div class="msg error"   id="msgError">❌ <span id="errorText">Something went wrong.</span></div>
@@ -166,100 +168,73 @@
 </footer>
 
 <script>
-  // Read event info from URL query params
-  const params     = new URLSearchParams(window.location.search);
-  const eventId    = params.get('id')    || '';
-  const eventTitle = decodeURIComponent(params.get('title') || 'Event');
-  const eventDate  = decodeURIComponent(params.get('date')  || '—');
-  const eventTime  = decodeURIComponent(params.get('time')  || '');
-  const eventVenue = decodeURIComponent(params.get('venue') || '—');
-  const eventCat   = decodeURIComponent(params.get('cat')   || 'Event');
+  document.addEventListener("DOMContentLoaded", () => {
+    const params     = new URLSearchParams(window.location.search);
+    const eventId    = params.get('eventId')    || '';
+    const eventTitle = decodeURIComponent(params.get('title') || 'Event');
+    const eventDate  = decodeURIComponent(params.get('date')  || '—');
+    const eventTime  = decodeURIComponent(params.get('time')  || '');
+    const eventVenue = decodeURIComponent(params.get('venue') || '—');
+    const eventCat   = decodeURIComponent(params.get('cat')   || 'Event');
 
-  document.getElementById('evTitle').textContent = eventTitle;
-  document.getElementById('evDate').textContent  = eventDate;
-  document.getElementById('evVenue').textContent = eventVenue;
-  document.getElementById('evCat').textContent   = '📋 ' + eventCat;
-  document.title = 'Register – ' + eventTitle + ' | CEMS';
-  if (eventTime) {
-    document.getElementById('evTime').textContent       = eventTime;
-    document.getElementById('evTimeWrap').style.display = '';
-  }
-
-  // Change this to match your backend server port
-  const API_BASE = 'http://localhost:5000';
-
-  async function submitRegistration() {
-    const fname = document.getElementById('regFname').value.trim();
-    const lname = document.getElementById('regLname').value.trim();
-    const usn   = document.getElementById('regUsn').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const dept  = document.getElementById('regDept').value;
-    const year  = document.getElementById('regYear').value;
-
-    if (!fname || !lname || !usn || !email || !dept || !year) {
-      showMsg('error', 'Please fill in all fields before submitting.');
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showMsg('error', 'Please enter a valid email address.');
-      return;
+    document.getElementById('evTitle').textContent = eventTitle;
+    document.getElementById('evDate').textContent  = eventDate;
+    document.getElementById('evVenue').textContent = eventVenue;
+    document.getElementById('evCat').textContent   = '📋 ' + eventCat;
+    document.title = 'Register – ' + eventTitle + ' | CEMS';
+    if (eventTime) {
+      document.getElementById('evTime').textContent       = eventTime;
+      document.getElementById('evTimeWrap').style.display = '';
     }
 
-    setLoading(true);
-    hideAllMsgs();
+    document.querySelector("#event-register-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    try {
-      const res = await fetch(`${API_BASE}/api/event-registrations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventId,
-          eventTitle,
-          name: fname + ' ' + lname,
-          usn,
-          email,
-          department: dept,
-          year
-        })
-      });
+      const regFname = document.getElementById("regFname").value;
+      const regLname = document.getElementById("regLname").value;
+      const regUsn = document.getElementById("regUsn").value;
+      const regEmail = document.getElementById("regEmail").value;
+      const regDept = document.getElementById("regDept").value;
+      const regYear = document.getElementById("regYear").value;
 
-      const data = await res.json();
+      try {
+        const response = await fetch("http://localhost:5000/event-register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: regFname,
+            lastName: regLname,
+            usn: regUsn,
+            email: regEmail,
+            department: regDept,
+            year: regYear,
+            eventId: eventId,
+          }),
+        });
 
-      if (res.status === 409) {
-        document.getElementById('msgDuplicate').style.display = 'flex';
-      } else if (res.ok) {
-        document.getElementById('msgSuccess').style.display = 'flex';
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('btnText').textContent = 'Registered ✓';
-      } else {
-        showMsg('error', data.message || 'Registration failed. Please try again.');
+        if (response.ok) {
+          document.getElementById("msgSuccess").style.display = "flex";
+          document.getElementById("msgError").style.display = "none";
+          document.getElementById("msgDuplicate").style.display = "none";
+        } else if (response.status === 409) {
+          document.getElementById("msgDuplicate").style.display = "flex";
+          document.getElementById("msgSuccess").style.display = "none";
+          document.getElementById("msgError").style.display = "none";
+        } else {
+          document.getElementById("msgError").style.display = "flex";
+          document.getElementById("msgSuccess").style.display = "none";
+          document.getElementById("msgDuplicate").style.display = "none";
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("msgError").style.display = "flex";
+        document.getElementById("msgSuccess").style.display = "none";
+        document.getElementById("msgDuplicate").style.display = "none";
       }
-    } catch (err) {
-      showMsg('error', 'Cannot connect to server. Make sure the backend is running on port 5000.');
-    }
-
-    setLoading(false);
-  }
-
-  function setLoading(on) {
-    document.getElementById('spinner').style.display = on ? 'block' : 'none';
-    document.getElementById('btnText').style.display = on ? 'none'  : 'inline';
-    document.getElementById('submitBtn').disabled = on;
-  }
-
-  function hideAllMsgs() {
-    ['msgSuccess','msgError','msgDuplicate'].forEach(id =>
-      document.getElementById(id).style.display = 'none'
-    );
-  }
-
-  function showMsg(type, text) {
-    hideAllMsgs();
-    if (type === 'error') {
-      document.getElementById('errorText').textContent = text;
-      document.getElementById('msgError').style.display = 'flex';
-    }
-  }
+    });
+  });
 </script>
 </body>
 </html>
