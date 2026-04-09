@@ -166,6 +166,14 @@
 </footer>
 
 <script>
+  // ── Auth guard: redirect to login if not signed in ──────────────────────────
+  (function() {
+    if (!sessionStorage.getItem('cemsRole')) {
+      sessionStorage.setItem('cemsRedirect', window.location.href);
+      window.location.href = 'login.html';
+    }
+  })();
+
   (function() {
     const role = sessionStorage.getItem('cemsRole') || 'student';
     if (role === 'student' || role === '') {
@@ -270,5 +278,6 @@
     }
   }
 </script>
+<script src="nav-auth.js"></script>
 </body>
 </html>

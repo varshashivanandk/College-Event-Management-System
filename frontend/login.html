@@ -92,9 +92,14 @@
     const selectedRole = document.querySelector('.role-btn.selected .role-name');
     const role = selectedRole ? selectedRole.textContent.toLowerCase() : 'student';
     sessionStorage.setItem('cemsRole', role);
+    // Save display name: use the part before @ if email, else the full input
+    const displayName = email.includes('@') ? email.split('@')[0] : email;
+    sessionStorage.setItem('cemsUser', displayName);
     const toast = document.getElementById('toast');
     toast.style.display = 'block';
-    setTimeout(() => { window.location.href = 'events.html'; }, 1800);
+    const redirect = sessionStorage.getItem('cemsRedirect') || 'events.html';
+    sessionStorage.removeItem('cemsRedirect');
+    setTimeout(() => { window.location.href = redirect; }, 1800);
   }
 </script>
 </body>
