@@ -86,49 +86,21 @@
     document.getElementById('pwToggle').textContent = pwVisible ? '🙈' : '👁️';
   }
   function handleLogin() {
-<<<<<<< HEAD
-  const email = document.getElementById('emailInput').value.trim();
-  const password = document.getElementById('passwordInput').value.trim();
-
-  if (!email || !password) {
-    alert('Please fill in your email and password.');
-    return;
-=======
     const email = document.getElementById('emailInput').value.trim();
     const pw = document.getElementById('passwordInput').value.trim();
     if (!email || !pw) { alert('Please fill in your email/USN and password.'); return; }
     const selectedRole = document.querySelector('.role-btn.selected .role-name');
     const role = selectedRole ? selectedRole.textContent.toLowerCase() : 'student';
     sessionStorage.setItem('cemsRole', role);
+    // Save display name: use the part before @ if email, else the full input
+    const displayName = email.includes('@') ? email.split('@')[0] : email;
+    sessionStorage.setItem('cemsUser', displayName);
     const toast = document.getElementById('toast');
     toast.style.display = 'block';
-    setTimeout(() => { window.location.href = 'events.html'; }, 1800);
->>>>>>> d8e48794a6b696a3c897d43fb2d5c4e78ae86c6b
+    const redirect = sessionStorage.getItem('cemsRedirect') || 'events.html';
+    sessionStorage.removeItem('cemsRedirect');
+    setTimeout(() => { window.location.href = redirect; }, 1800);
   }
-
-  // 🔥 API CALL
-  fetch("http://localhost:5000/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ email, password })
-  })
-  .then(res => res.text())
-  .then(data => {
-    alert(data);
-
-    if (data.includes("Successful")) {
-      const toast = document.getElementById('toast');
-      toast.style.display = 'block';
-
-      setTimeout(() => {
-        window.location.href = 'events.html';
-      }, 1500);
-    }
-  });
-}
-  
 </script>
 </body>
 </html>

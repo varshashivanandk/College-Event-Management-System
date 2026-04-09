@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Approve Events – CEMS</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .ap-page {
+    min-height: 100vh;
+    padding: 7rem 2.5rem 4rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem; }
+  .breadcrumb a { color: var(--accent); text-decoration: none; }
+
+  .page-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.4rem;
+  }
+
+  .page-sub { font-size: 0.95rem; color: var(--muted); margin-bottom: 2.5rem; }
+
+  /* Summary pills */
+  .summary-row {
+    display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2.5rem;
+  }
+
+  .summary-pill {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 0.9rem 1.4rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+
+  .pill-num {
+    font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+    line-height: 1;
+  }
+
+  .pill-num.pending  { color: #f57c00; }
+  .pill-num.approved { color: var(--success); }
+  .pill-num.rejected { color: #c62828; }
+
+  .pill-label { font-size: 0.8rem; color: var(--muted); font-weight: 500; }
+
+  /* Tab bar */
+  .tab-bar {
+    display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+    border-bottom: 1.5px solid var(--border); padding-bottom: 0;
+  }
+
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+    color: var(--muted); padding: 0.6rem 1.1rem 0.8rem;
+    border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+  /* Approval cards */
+  .approval-list { display: flex; flex-direction: column; gap: 1.2rem; }
+
+  .approval-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.6rem 1.8rem;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .approval-card.status-approved { border-left: 4px solid var(--success); }
+  .approval-card.status-rejected { border-left: 4px solid #f44336; }
+  .approval-card.status-pending  { border-left: 4px solid #f57c00; }
+
+  .ac-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem;
+  }
+
+  .ac-cat {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.4rem;
+  }
+
+  .ac-title {
+    font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+    letter-spacing: -0.01em; line-height: 1.2;
+  }
+
+  .status-badge {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 0.3rem 0.8rem; border-radius: 100px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+
+  .badge-pending  { background: rgba(245,124,0,0.1);  color: #f57c00; }
+  .badge-approved { background: rgba(0,200,83,0.1);   color: #00963e; }
+  .badge-rejected { background: rgba(244,67,54,0.08); color: #c62828; }
+
+  .ac-meta {
+    display: flex; gap: 1.2rem; flex-wrap: wrap;
+    margin-bottom: 0.8rem;
+  }
+
+  .ac-meta span { font-size: 0.82rem; color: var(--muted); }
+  .ac-meta strong { color: var(--ink); font-weight: 500; }
+
+  .ac-desc {
+    font-size: 0.85rem; color: var(--muted); line-height: 1.65;
+    margin-bottom: 1.2rem;
+  }
+
+  .ac-coordinator {
+    font-size: 0.8rem; color: var(--muted);
+    background: rgba(10,10,20,0.03); border-radius: 8px;
+    padding: 0.5rem 0.8rem; margin-bottom: 1.2rem;
+    display: inline-block;
+  }
+
+  .ac-coordinator strong { color: var(--ink); }
+
+  /* Action buttons */
+  .ac-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+
+  .btn-approve {
+    background: var(--success); color: #fff;
+    border: none; border-radius: 10px; padding: 0.65rem 1.4rem;
+    font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-approve:hover { background: #009624; transform: translateY(-1px); }
+
+  .btn-reject {
+    background: rgba(244,67,54,0.08); color: #c62828;
+    border: 1.5px solid rgba(244,67,54,0.25); border-radius: 10px;
+    padding: 0.65rem 1.4rem;
+    font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+
+  .btn-reject:hover { background: rgba(244,67,54,0.15); }
+
+  .btn-done {
+    background: transparent; color: var(--muted);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 0.65rem 1.4rem;
+    font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 600;
+    cursor: default;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 4rem 2rem;
+    color: var(--muted); display: none;
+  }
+
+  .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* Reject modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(10,10,20,0.5); z-index: 200;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--card-bg); border-radius: 18px;
+    padding: 2rem; max-width: 440px; width: 90%;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .modal-box h3 {
+    font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+    margin-bottom: 0.4rem;
+  }
+
+  .modal-box p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.2rem; }
+
+  .modal-box textarea {
+    width: 100%; background: var(--input-bg); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 0.8rem 1rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink);
+    outline: none; resize: vertical; min-height: 90px;
+    transition: border-color 0.2s;
+  }
+
+  .modal-box textarea:focus { border-color: var(--accent); }
+
+  .modal-actions { display: flex; gap: 0.7rem; margin-top: 1rem; }
+
+  .btn-modal-confirm {
+    flex: 1; background: #f44336; color: #fff; border: none;
+    border-radius: 10px; padding: 0.75rem;
+    font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+
+  .btn-modal-confirm:hover { background: #c62828; }
+
+  .btn-modal-cancel {
+    background: transparent; color: var(--muted);
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 0.75rem 1.2rem;
+    font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+
+  .btn-modal-cancel:hover { border-color: var(--ink); color: var(--ink); }
+
+  /* Logout link */
+  .logout-btn {
+    font-size: 0.82rem; color: var(--muted); cursor: pointer;
+    text-decoration: none; transition: color 0.2s;
+  }
+
+  .logout-btn:hover { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .ap-page { padding: 6rem 1.25rem 3rem; }
+    .summary-row { gap: 0.7rem; }
+    .ac-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><div class="logo-dot"></div><div>CEMS<span>.rvu</span></div></a>
+  <div class="nav-links">
+    <a href="approve-events.html" class="active">Approvals</a>
+    <a href="events.html">View Events</a>
+    <a href="login.html">Sign In</a>
+    <a href="register.html" class="nav-cta">Get Started →</a>
+  </div>
+</nav>
+
+<div class="ap-page">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a> → Faculty Dashboard
+  </div>
+
+  <h1 class="page-title">Event Approvals</h1>
+  <p class="page-sub">Review event requests submitted by coordinators. Approved events go live on the events page.</p>
+
+  <!-- Summary pills -->
+  <div class="summary-row">
+    <div class="summary-pill">
+      <div>
+        <div class="pill-num pending" id="countPending">—</div>
+        <div class="pill-label">Pending</div>
+      </div>
+    </div>
+    <div class="summary-pill">
+      <div>
+        <div class="pill-num approved" id="countApproved">—</div>
+        <div class="pill-label">Approved</div>
+      </div>
+    </div>
+    <div class="summary-pill">
+      <div>
+        <div class="pill-num rejected" id="countRejected">—</div>
+        <div class="pill-label">Rejected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('pending',this)">⏳ Pending</button>
+    <button class="tab-btn" onclick="showTab('approved',this)">✅ Approved</button>
+    <button class="tab-btn" onclick="showTab('rejected',this)">❌ Rejected</button>
+    <button class="tab-btn" onclick="showTab('all',this)">All</button>
+  </div>
+
+  <div class="approval-list" id="approvalList"></div>
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">📭</div>
+    <p>No events in this category yet.</p>
+  </div>
+</div>
+
+<!-- Reject reason modal -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal-box">
+    <h3>Reason for Rejection</h3>
+    <p>Optionally provide a reason so the coordinator can revise and resubmit.</p>
+    <textarea id="rejectReason" placeholder="e.g. Venue not available on this date. Please reschedule."></textarea>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-modal-confirm" onclick="confirmReject()">Confirm Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">CEMS<span>.rvu</span></div>
+  <div>College Event Management System · © 2026</div>
+  <div>RV University, Bengaluru</div>
+</footer>
+
+<script>
+  // ── Auth guard ─────────────────────────────────────────────────────────────
+  (function() {
+    const role = sessionStorage.getItem('cemsRole');
+    if (!role) { window.location.href = 'login.html'; return; }
+    if (role !== 'faculty') { window.location.href = 'events.html'; return; }
+  })();
+
+
+
+  // ── Data ───────────────────────────────────────────────────────────────────
+  // In production, fetch from: GET /api/events?status=pending (or all)
+  // For now we keep a local array that persists in sessionStorage so
+  // approve/reject actions survive a page refresh during the demo.
+
+  const API_BASE = 'http://localhost:5000';
+  let events = [];
+  let currentTab = 'pending';
+  let rejectingId = null;
+
+  // Seed demo data if backend isn't up yet
+  const DEMO_EVENTS = [
+    {
+      _id: 'demo-001', status: 'pending', category: 'Technical',
+      title: 'AI & Machine Learning Summit', date: '2026-05-10',
+      timeStart: '10:00', timeEnd: '16:00', venue: 'Seminar Hall A',
+      description: 'A full-day summit on AI/ML trends, with talks from industry experts and live demos.',
+      coordinator: { name: 'Ravi Kumar', department: 'CSE', email: 'ravi@rvu.edu.in' }
+    },
+    {
+      _id: 'demo-002', status: 'pending', category: 'Cultural',
+      title: 'Freshers\' Welcome Night', date: '2026-05-18',
+      timeStart: '17:00', timeEnd: '21:00', venue: 'Open Amphitheatre',
+      description: 'An evening of music, skits, and performances to welcome the new batch of 2026.',
+      coordinator: { name: 'Priya Nair', department: 'MBA', email: 'priya@rvu.edu.in' }
+    },
+    {
+      _id: 'demo-003', status: 'approved', category: 'Workshop',
+      title: 'Git & GitHub Essentials', date: '2026-04-28',
+      timeStart: '09:00', timeEnd: '12:00', venue: 'Computer Lab 2',
+      description: 'Hands-on workshop on version control, branching strategies, and CI/CD basics.',
+      coordinator: { name: 'Arjun Mehta', department: 'ISE', email: 'arjun@rvu.edu.in' }
+    },
+  ];
+
+  async function loadEvents() {
+    try {
+      const res = await fetch(`${API_BASE}/api/events`);
+      if (!res.ok) throw new Error('not ok');
+      events = await res.json();
+    } catch {
+      // Backend not running — use demo data
+      const stored = sessionStorage.getItem('cemsApprovalState');
+      events = stored ? JSON.parse(stored) : DEMO_EVENTS;
+    }
+    updateCounts();
+    renderList();
+  }
+
+  function saveState() {
+    sessionStorage.setItem('cemsApprovalState', JSON.stringify(events));
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function updateCounts() {
+    document.getElementById('countPending').textContent  = events.filter(e => e.status === 'pending').length;
+    document.getElementById('countApproved').textContent = events.filter(e => e.status === 'approved').length;
+    document.getElementById('countRejected').textContent = events.filter(e => e.status === 'rejected').length;
+  }
+
+  function showTab(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+  }
+
+  function renderList() {
+    const filtered = currentTab === 'all'
+      ? events
+      : events.filter(e => e.status === currentTab);
+
+    const list = document.getElementById('approvalList');
+    const empty = document.getElementById('emptyState');
+
+    if (!filtered.length) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    list.innerHTML = filtered.map(ev => buildCard(ev)).join('');
+  }
+
+  function fmt(t) {
+    if (!t) return '';
+    const [h, m] = t.split(':');
+    const hr = parseInt(h), s = hr >= 12 ? 'PM' : 'AM';
+    return ((hr % 12) || 12) + ':' + m + ' ' + s;
+  }
+
+  function buildCard(ev) {
+    const dateStr = ev.date
+      ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+      : '—';
+    const timeStr = ev.timeStart
+      ? (ev.timeEnd ? fmt(ev.timeStart) + ' – ' + fmt(ev.timeEnd) : fmt(ev.timeStart))
+      : '—';
+
+    const badgeClass  = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected' }[ev.status];
+    const badgeLabel  = { pending:'⏳ Pending', approved:'✅ Approved', rejected:'❌ Rejected' }[ev.status];
+    const cardClass   = `approval-card status-${ev.status}`;
+
+    const actions = ev.status === 'pending'
+      ? `<button class="btn-approve" onclick="approve('${ev._id}')">✅ Approve</button>
+         <button class="btn-reject"  onclick="openReject('${ev._id}')">❌ Reject</button>`
+      : `<span class="btn-done">${ev.status === 'approved' ? '✅ Approved' : '❌ Rejected'}</span>
+         ${ev.rejectReason ? `<span style="font-size:0.8rem;color:var(--muted);align-self:center">Reason: ${ev.rejectReason}</span>` : ''}`;
+
+    return `
+      <div class="${cardClass}" id="card-${ev._id}">
+        <div class="ac-header">
+          <div>
+            <div class="ac-cat">${ev.category || 'Event'}</div>
+            <div class="ac-title">${ev.title}</div>
+          </div>
+          <span class="status-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <div class="ac-meta">
+          <span>📅 <strong>${dateStr}</strong></span>
+          <span>🕐 <strong>${timeStr}</strong></span>
+          <span>📍 <strong>${ev.venue || '—'}</strong></span>
+        </div>
+        <div class="ac-desc">${ev.description || ''}</div>
+        <div class="ac-coordinator">
+          Submitted by <strong>${ev.coordinator?.name || '—'}</strong>
+          · ${ev.coordinator?.department || ''} · ${ev.coordinator?.email || ''}
+        </div>
+        <div class="ac-actions">${actions}</div>
+      </div>`;
+  }
+
+  // ── Approve ────────────────────────────────────────────────────────────────
+  async function approve(id) {
+    try {
+      await fetch(`${API_BASE}/api/events/${id}/approve`, { method: 'PATCH' });
+    } catch { /* backend not up, update locally */ }
+
+    events = events.map(e => e._id === id ? { ...e, status: 'approved' } : e);
+    saveState();
+    updateCounts();
+    renderList();
+  }
+
+  // ── Reject ─────────────────────────────────────────────────────────────────
+  function openReject(id) {
+    rejectingId = id;
+    document.getElementById('rejectReason').value = '';
+    document.getElementById('rejectModal').classList.add('open');
+  }
+
+  function closeModal() {
+    rejectingId = null;
+    document.getElementById('rejectModal').classList.remove('open');
+  }
+
+  async function confirmReject() {
+    const reason = document.getElementById('rejectReason').value.trim();
+    try {
+      await fetch(`${API_BASE}/api/events/${rejectingId}/reject`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+      });
+    } catch { /* backend not up, update locally */ }
+
+    events = events.map(e =>
+      e._id === rejectingId ? { ...e, status: 'rejected', rejectReason: reason } : e
+    );
+    saveState();
+    closeModal();
+    updateCounts();
+    renderList();
+  }
+
+  // Close modal on overlay click
+  document.getElementById('rejectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  loadEvents();
+</script>
+<script src="nav-auth.js"></script>
+</body>
+</html>
