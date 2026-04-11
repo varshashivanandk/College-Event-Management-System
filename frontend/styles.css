@@ -121,7 +121,43 @@ nav {
 
 .nav-cta:hover {   background: #ff6a4f !important;
  }
+/* ✅ Align right side properly */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* reduce spacing slightly */
+}
 
+/* ✅ Username styling */
+#navUser {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--paper);
+  margin-left: 10px;
+}
+
+/* ✅ Logout button styling */
+.logout-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: transparent;
+  color: var(--paper);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ✅ Optional: better spacing for last items */
+.nav-links span,
+.nav-links button {
+  display: flex;
+  align-items: center;
+}
 
 /* ============================================================
    5. SHARED BUTTONS

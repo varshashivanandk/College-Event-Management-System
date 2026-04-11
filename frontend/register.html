@@ -127,9 +127,8 @@
       <div class="success-circle">✅</div>
       <h2>You're in!</h2>
       <p>Your account has been created successfully.<br>Welcome to CEMS, RV University's event hub.</p>
-      <a href="events.html" class="btn-goto">Explore Events →</a>
-    </div>
-
+      
+<button class="btn-goto" onclick="goToEvents()">Explore Events →</button>
   </div>
 </div>
 
@@ -214,7 +213,6 @@
   const terms = document.getElementById('terms').checked;
   const errEl = document.getElementById('pwMatchErr');
 
-  // validation
   if (password !== pw2) {
     errEl.style.display = 'block';
     return;
@@ -246,20 +244,41 @@
     })
   })
   .then(res => res.text())
-  .then(data => {
-    alert(data);
+ .then(data => {
+  alert(data);
 
-    if (data.includes("Successfully")) {
-      document.getElementById('step2').style.display = 'none';
-      document.getElementById('stepsIndicator').style.display = 'none';
-      document.getElementById('successState').style.display = 'block';
-    }
-  })
+  if (data.includes("Successfully")) {
+
+    // ✅ SAVE SESSION
+    sessionStorage.clear(); // ✅ add this BEFORE setting new user
+
+sessionStorage.setItem("cemsUser", fname);
+sessionStorage.setItem("cemsRole", role.toLowerCase());
+
+    // ✅ SHOW SUCCESS UI
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('stepsIndicator').style.display = 'none';
+    document.getElementById('successState').style.display = 'block';
+
+    // ✅ ROLE-BASED REDIRECT
+    setTimeout(() => {
+      if (role.toLowerCase() === "faculty") {
+        window.location.href = "approve-events.html";
+      } else {
+        window.location.href = "events.html";
+      }
+    }, 1500);
+  }
+})
   .catch(err => {
     console.log(err);
     alert("Something went wrong");
   });
 }
+function goToEvents() {
+  window.location.href = "events.html";
+}
+
 </script>
 </body>
 </html>

@@ -31,7 +31,7 @@ app.post("/events", async (req, res) => {
       category,
       maxParticipants,
       coordinator,
-      status
+      status, // Set default status to pending
     } = req.body;
 
     // Validate required fields
@@ -52,7 +52,7 @@ app.post("/events", async (req, res) => {
       category,
       maxParticipants,
       coordinator,
-      status
+      status:"pending" // Set default status to pending
     });
 
     await event.save();
@@ -67,7 +67,7 @@ app.post("/events", async (req, res) => {
 
 app.get("/events", async (req, res) => {
  try {
-   const events = await Event.find();
+  const events = await Event.find({ status: "approved" });
    const updatedEvents = events.map(event => ({
      ...event._doc,
      venue: event.location // Map location to venue for frontend compatibility
@@ -157,7 +157,6 @@ app.post("/event-register", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -165,26 +164,69 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.send("User not found ❌");
+      return res.json({ message: "User not found" });
     }
 
     if (user.password !== password) {
-      return res.send("Incorrect password ❌");
+      return res.json({ message: "Incorrect password" });
     }
 
-    // ✅ SAVE LOGIN DETAILS
+    // ✅ Save login record (optional)
     const loginRecord = new Login({
       email: user.email,
       role: user.role
     });
-
     await loginRecord.save();
 
-    res.send("Login Successful ✅");
+    // 🔥 IMPORTANT: send user name + role
+    res.json({
+      message: "Login Successful",
+      name: user.firstName,   // 👈 THIS IS KEY
+      role: user.role.toLowerCase()
+    });
 
   } catch (err) {
     console.log(err);
-    res.status(500).send("Server error");
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET pending events
+
+app.put("/approve-event/:id", async (req, res) => {
+  try {
+    const updated = await Event.findByIdAndUpdate(
+      req.params.id,
+      { status: "approved" },
+      { new: true }
+    );
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).send("Error approving event");
+  }
+});
+app.put("/reject-event/:id", async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    await Event.findByIdAndUpdate(req.params.id, {
+      status: "rejected",
+      rejectReason: reason
+    });
+
+    res.json({ message: "Rejected" });
+  } catch (err) {
+    res.status(500).json({ message: "Error rejecting event" });
+  }
+});
+app.get("/all-events", async (req, res) => {
+  try {
+    const events = await Event.find();
+    console.log("All events:", events);
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching events" });
   }
 });
 app.listen(5000, () => {

@@ -11,11 +11,11 @@
 <nav>
   <a href="index.html" class="nav-logo"><div class="logo-dot"></div><div>CEMS<span>.rvu</span></div></a>
   <div class="nav-links">
-    <a href="events.html" class="active">Events</a>
-    <a href="index.html#features">Features</a>
-    <a href="create-event.html">+ Create Event</a>
-    <a href="login.html">Sign In</a>
-    <a href="register.html" class="nav-cta">Get Started →</a>
+  <a href="events.html">Events</a>
+  <a href="index.html#features">Features</a>
+  <a href="create-event.html">+ Create Event</a>
+  
+</div>
   </div>
 </nav>
 
@@ -55,7 +55,7 @@
   <div>RV University, Bengaluru</div>
 </footer>
 
-<script src="events-data.js"></script>
+
 <script>
   /* ── Auth: hide Create Event for non-coordinators ───────────────────────── */
   (function() {
@@ -67,61 +67,10 @@
   })();
 
   /* ── Render featured event ──────────────────────────────────────────────── */
-  function renderFeatured() {
-    const ev = CEMS_EVENTS.find(e => e.featured);
-    if (!ev) return;
-    const url = buildRegisterUrl(ev);
-    document.getElementById('featuredWrap').innerHTML =
-      '<div class="featured-event">' +
-        '<div>' +
-          '<div class="feat-category">' + (CAT_ICON[ev.category] || '🏆') + ' ' + ev.category + '</div>' +
-          '<h2>' + ev.title + '</h2>' +
-          '<div class="feat-meta">' +
-            '<span>📅 <strong>' + ev.date + '</strong></span>' +
-            (ev.time ? '<span>🕐 <strong>' + ev.time + '</strong></span>' : '') +
-            '<span>📍 <strong>' + ev.venue + '</strong></span>' +
-          '</div>' +
-          '<p style="font-size:0.88rem;color:rgba(245,243,238,0.6);margin-bottom:1.5rem;max-width:500px;line-height:1.7">' + ev.desc + '</p>' +
-          (ev.full
-            ? '<span class="full-badge" style="font-size:0.9rem">🔴 Fully Booked</span>'
-            : '<a href="' + url + '" class="btn-register register-link">Register Now →</a>') +
-        '</div>' +
-        (ev.spots != null
-          ? '<div class="feat-spots"><div class="big-num">' + ev.spots + '</div><div class="spots-label">spots remaining</div></div>'
-          : '') +
-      '</div>';
-  }
+
 
   /* ── Render event grid cards ────────────────────────────────────────────── */
-  function buildCard(ev) {
-    const url      = buildRegisterUrl(ev);
-    const catClass = CAT_CLASS[ev.category] || 'tech';
-    const action   = ev.full
-      ? '<span class="full-badge">🔴 Full</span>'
-      : '<a href="' + url + '" class="card-action register-link">Register</a>';
 
-    return '<div class="event-card" data-category="' + catClass + '">' +
-        '<div class="card-top">' +
-          '<span class="card-category cat-' + catClass + '">' + ev.category + '</span>' +
-          '<h3>' + ev.title + '</h3>' +
-          '<p class="event-desc">' + ev.desc + '</p>' +
-        '</div>' +
-        '<div class="card-divider"></div>' +
-        '<div class="card-bottom">' +
-          '<div class="card-meta">' +
-            '<span>📅 <strong>' + ev.date + '</strong></span>' +
-            '<span>📍 <strong>' + ev.venue + '</strong></span>' +
-          '</div>' +
-          action +
-        '</div>' +
-      '</div>';
-  }
-
-  function renderGrid() {
-    const nonFeatured = CEMS_EVENTS.filter(function(e) { return !e.featured; });
-    document.getElementById('eventsGrid').innerHTML = nonFeatured.map(buildCard).join('');
-    updateCount();
-  }
 
   /* ── Filter & search ────────────────────────────────────────────────────── */
   var activeFilter = 'all';
@@ -158,10 +107,59 @@
       window.location.href = 'login.html';
     }
   });
+ function displayEvents(events) {
+  const container = document.getElementById("eventsGrid");
 
-  /* ── Init ───────────────────────────────────────────────────────────────── */
-  renderFeatured();
-  renderGrid();
+  if (!events.length) {
+    container.innerHTML = "<p>No approved events available</p>";
+    return;
+  }
+
+  container.innerHTML = events.map(ev => `
+    <div class="event-card">
+      <div class="card-top">
+        <span class="card-category">${ev.category}</span>
+        <h3>${ev.title}</h3>
+        <p class="event-desc">${ev.description}</p>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-bottom">
+        <div class="card-meta">
+          <span>📅 <strong>${ev.date}</strong></span>
+          <span>📍 <strong>${ev.location || ev.venue || '—'}</strong></span>
+        </div>
+
+        <a href="event-register.html?id=${ev._id}&title=${encodeURIComponent(ev.title)}&date=${encodeURIComponent(ev.date)}&venue=${encodeURIComponent(ev.location)}"
+           class="card-action register-link">
+           Register →
+        </a>
+      </div>
+    </div>
+  `).join("");
+
+  document.getElementById("eventCount").textContent =
+    events.length + " event" + (events.length !== 1 ? "s" : "");
+}
+
+
+
+const API_BASE = "http://localhost:5000";
+
+async function loadEvents() {
+  try {
+    const res = await fetch(`${API_BASE}/events`);
+    const data = await res.json();
+
+    console.log("Approved events:", data); // 🔍 MUST SHOW DATA
+
+    displayEvents(data);
+  } catch (err) {
+    console.log("Error:", err);
+  }
+}
+loadEvents();
 </script>
 <script src="nav-auth.js"></script>
 </body>

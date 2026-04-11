@@ -326,43 +326,23 @@
   let rejectingId = null;
 
   // Seed demo data if backend isn't up yet
-  const DEMO_EVENTS = [
-    {
-      _id: 'demo-001', status: 'pending', category: 'Technical',
-      title: 'AI & Machine Learning Summit', date: '2026-05-10',
-      timeStart: '10:00', timeEnd: '16:00', venue: 'Seminar Hall A',
-      description: 'A full-day summit on AI/ML trends, with talks from industry experts and live demos.',
-      coordinator: { name: 'Ravi Kumar', department: 'CSE', email: 'ravi@rvu.edu.in' }
-    },
-    {
-      _id: 'demo-002', status: 'pending', category: 'Cultural',
-      title: 'Freshers\' Welcome Night', date: '2026-05-18',
-      timeStart: '17:00', timeEnd: '21:00', venue: 'Open Amphitheatre',
-      description: 'An evening of music, skits, and performances to welcome the new batch of 2026.',
-      coordinator: { name: 'Priya Nair', department: 'MBA', email: 'priya@rvu.edu.in' }
-    },
-    {
-      _id: 'demo-003', status: 'approved', category: 'Workshop',
-      title: 'Git & GitHub Essentials', date: '2026-04-28',
-      timeStart: '09:00', timeEnd: '12:00', venue: 'Computer Lab 2',
-      description: 'Hands-on workshop on version control, branching strategies, and CI/CD basics.',
-      coordinator: { name: 'Arjun Mehta', department: 'ISE', email: 'arjun@rvu.edu.in' }
-    },
-  ];
+  
 
   async function loadEvents() {
-    try {
-      const res = await fetch(`${API_BASE}/api/events`);
-      if (!res.ok) throw new Error('not ok');
-      events = await res.json();
-    } catch {
-      // Backend not running — use demo data
-      const stored = sessionStorage.getItem('cemsApprovalState');
-      events = stored ? JSON.parse(stored) : DEMO_EVENTS;
-    }
+  try {
+    const res = await fetch("http://localhost:5000/all-events");
+    const data = await res.json();
+
+    console.log("All events:", data); // debug
+
+    events = data;
     updateCounts();
     renderList();
+
+  } catch (err) {
+    console.log("Error fetching events:", err);
   }
+}
 
   function saveState() {
     sessionStorage.setItem('cemsApprovalState', JSON.stringify(events));
@@ -411,9 +391,9 @@
     const dateStr = ev.date
       ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
       : '—';
-    const timeStr = ev.timeStart
-      ? (ev.timeEnd ? fmt(ev.timeStart) + ' – ' + fmt(ev.timeEnd) : fmt(ev.timeStart))
-      : '—';
+    const timeStr = (ev.timeStart && ev.timeEnd)
+  ? `${fmt(ev.timeStart)} – ${fmt(ev.timeEnd)}`
+  : (ev.timeStart ? fmt(ev.timeStart) : '—');
 
     const badgeClass  = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected' }[ev.status];
     const badgeLabel  = { pending:'⏳ Pending', approved:'✅ Approved', rejected:'❌ Rejected' }[ev.status];
@@ -437,7 +417,7 @@
         <div class="ac-meta">
           <span>📅 <strong>${dateStr}</strong></span>
           <span>🕐 <strong>${timeStr}</strong></span>
-          <span>📍 <strong>${ev.venue || '—'}</strong></span>
+          <span>📍 <strong>${ev.location ? ev.location : (ev.venue ? ev.venue : 'Not specified')}</strong></span>
         </div>
         <div class="ac-desc">${ev.description || ''}</div>
         <div class="ac-coordinator">
@@ -450,15 +430,22 @@
 
   // ── Approve ────────────────────────────────────────────────────────────────
   async function approve(id) {
-    try {
-      await fetch(`${API_BASE}/api/events/${id}/approve`, { method: 'PATCH' });
-    } catch { /* backend not up, update locally */ }
+  try {
+    console.log("Approving:", id); // debug
 
-    events = events.map(e => e._id === id ? { ...e, status: 'approved' } : e);
-    saveState();
-    updateCounts();
-    renderList();
+    await fetch(`${API_BASE}/approve-event/${id}`, {
+      method: "PUT"
+    });
+
+    alert("Approved ✅");
+
+    // reload from backend (BEST)
+    loadEvents();
+
+  } catch (err) {
+    console.log("Error:", err);
   }
+}
 
   // ── Reject ─────────────────────────────────────────────────────────────────
   function openReject(id) {
@@ -466,30 +453,26 @@
     document.getElementById('rejectReason').value = '';
     document.getElementById('rejectModal').classList.add('open');
   }
+  async function confirmReject() {
+  const reason = document.getElementById('rejectReason').value;
+
+  await fetch(`${API_BASE}/reject-event/${rejectingId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason })
+  });
+
+  alert("Rejected ❌");
+  closeModal();
+  loadEvents();
+}
 
   function closeModal() {
     rejectingId = null;
     document.getElementById('rejectModal').classList.remove('open');
   }
 
-  async function confirmReject() {
-    const reason = document.getElementById('rejectReason').value.trim();
-    try {
-      await fetch(`${API_BASE}/api/events/${rejectingId}/reject`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason })
-      });
-    } catch { /* backend not up, update locally */ }
-
-    events = events.map(e =>
-      e._id === rejectingId ? { ...e, status: 'rejected', rejectReason: reason } : e
-    );
-    saveState();
-    closeModal();
-    updateCounts();
-    renderList();
-  }
+ 
 
   // Close modal on overlay click
   document.getElementById('rejectModal').addEventListener('click', function(e) {

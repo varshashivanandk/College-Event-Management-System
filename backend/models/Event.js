@@ -12,7 +12,10 @@ const EventSchema = new mongoose.Schema({
   timeEnd: String,
 
   maxParticipants: Number,   // ✅ ADD THIS
-  status: String,            // ✅ ADD THIS
+  status: {
+  type: String,
+  default: "pending"
+},         // ✅ ADD THIS
 
   coordinator: {
     name: String,

@@ -1,10 +1,19 @@
 /* nav-auth.js — include on every page, call applyNavAuth() after DOM loads */
 
 function applyNavAuth() {
-  const role = sessionStorage.getItem('cemsRole');
-  const user = sessionStorage.getItem('cemsUser');
+
   const navLinks = document.querySelector('.nav-links');
   if (!navLinks) return;
+
+  // ✅ NOW safe to use navLinks
+  const oldUser = navLinks.querySelector('.nav-user');
+  if (oldUser) oldUser.remove();
+
+  const oldApprove = navLinks.querySelector('a[href="approve-events.html"]');
+  if (oldApprove) oldApprove.remove();
+
+  const role = sessionStorage.getItem('cemsRole');
+  const user = sessionStorage.getItem('cemsUser');
 
   const signInLink  = navLinks.querySelector('a[href="login.html"]');
   const getStarted  = navLinks.querySelector('a[href="register.html"].nav-cta');

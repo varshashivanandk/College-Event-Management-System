@@ -81,22 +81,52 @@
     document.getElementById('passwordInput').type = pwVisible ? 'text' : 'password';
     document.getElementById('pwToggle').textContent = pwVisible ? '🙈' : '👁️';
   }
-  function handleLogin() {
-    const email = document.getElementById('emailInput').value.trim();
-    const pw = document.getElementById('passwordInput').value.trim();
-    if (!email || !pw) { alert('Please fill in your email/USN and password.'); return; }
-    const selectedRole = document.querySelector('.role-btn.selected .role-name');
-    const role = selectedRole ? selectedRole.textContent.toLowerCase() : 'student';
-    sessionStorage.setItem('cemsRole', role);
-    // Save display name: use the part before @ if email, else the full input
-    const displayName = email.includes('@') ? email.split('@')[0] : email;
-    sessionStorage.setItem('cemsUser', displayName);
-    const toast = document.getElementById('toast');
-    toast.style.display = 'block';
-    const redirect = sessionStorage.getItem('cemsRedirect') || 'events.html';
-    sessionStorage.removeItem('cemsRedirect');
-    setTimeout(() => { window.location.href = redirect; }, 1800);
+  async function handleLogin() {
+  const email = document.getElementById('emailInput').value.trim();
+  const pw = document.getElementById('passwordInput').value.trim();
+
+  if (!email || !pw) {
+    alert('Please fill in your email/USN and password.');
+    return;
   }
+
+  try {
+    const res = await fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: pw })
+    });
+
+    const data = await res.json();
+
+    if (data.message.includes("Successful")) {
+
+      // 🔥 CLEAR OLD SESSION (IMPORTANT)
+      sessionStorage.clear();
+
+      // ✅ STORE CORRECT NAME FROM BACKEND
+      sessionStorage.setItem("cemsUser", data.name);
+     sessionStorage.setItem("cemsRole", data.role.toLowerCase());
+console.log("ROLE:", sessionStorage.getItem("cemsRole"));
+      document.getElementById('toast').style.display = 'block';
+
+      setTimeout(() => {
+        if (data.role === "faculty") {
+          window.location.href = "approve-events.html";
+        } else {
+          window.location.href = "events.html";
+        }
+      }, 1500);
+
+    } else {
+      alert(data.message || "Login failed");
+    }
+
+  } catch (err) {
+    console.log(err);
+    alert("Server error");
+  }
+}
 </script>
 </body>
 </html>
