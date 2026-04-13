@@ -33,18 +33,7 @@
       <p>New here? <a href="register.html">Create an account →</a></p>
     </div>
 
-    <span class="role-label">Sign in as</span>
-    <div class="role-select">
-      <div class="role-btn selected" onclick="selectRole(this)">
-        <span class="role-icon">👤</span><span class="role-name">User</span>
-      </div>
-      <div class="role-btn" onclick="selectRole(this)">
-        <span class="role-icon">📋</span><span class="role-name">Coordinator</span>
-      </div>
-      <div class="role-btn" onclick="selectRole(this)">
-        <span class="role-icon">🛡️</span><span class="role-name">Faculty</span>
-      </div>
-    </div>
+    
 
     <div class="field">
       <label>Email / USN</label>
@@ -62,8 +51,9 @@
       </div>
     </div>
 
-    <button class="btn-login" onclick="handleLogin()">Sign In <span>→</span></button>
-
+    <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+  Sign In <span>→</span>
+</button>
 
   </div>
 </div>
@@ -71,24 +61,24 @@
 <div class="success-toast" id="toast">✅ Logged in! Redirecting…</div>
 
 <script>
-  function selectRole(btn) {
-    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-  }
+  
+  
   let pwVisible = false;
   function togglePw() {
     pwVisible = !pwVisible;
     document.getElementById('passwordInput').type = pwVisible ? 'text' : 'password';
     document.getElementById('pwToggle').textContent = pwVisible ? '🙈' : '👁️';
   }
-  async function handleLogin() {
+   async function handleLogin() {
+    document.getElementById("loginBtn").disabled = true;
   const email = document.getElementById('emailInput').value.trim();
   const pw = document.getElementById('passwordInput').value.trim();
 
-  if (!email || !pw) {
-    alert('Please fill in your email/USN and password.');
-    return;
-  }
+ if (!email || !pw) {
+  alert('Please fill in your email/USN and password.');
+  document.getElementById("loginBtn").disabled = false;  // ✅ ADD
+  return;
+}
 
   try {
     const res = await fetch("http://localhost:5000/login", {
@@ -99,34 +89,45 @@
 
     const data = await res.json();
 
-    if (data.message.includes("Successful")) {
+    if (data.message === "Login Successful") {
 
-      // 🔥 CLEAR OLD SESSION (IMPORTANT)
       sessionStorage.clear();
 
-      // ✅ STORE CORRECT NAME FROM BACKEND
       sessionStorage.setItem("cemsUser", data.name);
-     sessionStorage.setItem("cemsRole", data.role.toLowerCase());
-console.log("ROLE:", sessionStorage.getItem("cemsRole"));
+      sessionStorage.setItem("cemsRole", data.role);
+
       document.getElementById('toast').style.display = 'block';
 
       setTimeout(() => {
-        if (data.role === "faculty") {
+
+        if (data.role === "admin") {
+          window.location.href = "admin-dashboard.html";
+
+        } else if (data.role === "faculty") {
           window.location.href = "approve-events.html";
+
         } else {
           window.location.href = "events.html";
         }
+
       }, 1500);
 
     } else {
-      alert(data.message || "Login failed");
+      if (data.message === "Waiting for admin approval") {
+  alert("⏳ Your account is waiting for admin approval.\nPlease try again later.");
+} else {
+  alert(data.message);
+}
+document.getElementById("loginBtn").disabled = false;
     }
 
   } catch (err) {
-    console.log(err);
-    alert("Server error");
-  }
+  console.log(err);
+  alert("Server error");
+  document.getElementById("loginBtn").disabled = false; // ✅ ADD
 }
+}
+    
 </script>
 </body>
 </html>

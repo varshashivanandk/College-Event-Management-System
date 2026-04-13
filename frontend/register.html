@@ -238,7 +238,7 @@
       name: name,
       email: email,
       password: password,
-      role: role,
+      role: role.toLowerCase(),
       usn: usn,
       department: dept
     })
@@ -247,28 +247,35 @@
  .then(data => {
   alert(data);
 
-  if (data.includes("Successfully")) {
+if (data.includes("Successfully")) {
 
-    // ✅ SAVE SESSION
-    sessionStorage.clear(); // ✅ add this BEFORE setting new user
+  const roleLower = role.toLowerCase();
 
-sessionStorage.setItem("cemsUser", fname);
-sessionStorage.setItem("cemsRole", role.toLowerCase());
+  // 🎯 CASE 1: NORMAL USER → AUTO LOGIN
+  if (roleLower === "user") {
 
-    // ✅ SHOW SUCCESS UI
+    sessionStorage.clear();
+    sessionStorage.setItem("cemsUser", name);
+    sessionStorage.setItem("cemsRole", roleLower);
+
     document.getElementById('step2').style.display = 'none';
     document.getElementById('stepsIndicator').style.display = 'none';
     document.getElementById('successState').style.display = 'block';
 
-    // ✅ ROLE-BASED REDIRECT
     setTimeout(() => {
-      if (role.toLowerCase() === "faculty") {
-        window.location.href = "approve-events.html";
-      } else {
-        window.location.href = "events.html";
-      }
+      window.location.href = "events.html";
     }, 1500);
+
   }
+
+  // 🎯 CASE 2: COORDINATOR / FACULTY → WAIT
+  else {
+
+    alert("⏳ Your account request has been sent to admin.\nPlease wait for approval before logging in.");
+
+    window.location.href = "login.html";
+  }
+}
 })
   .catch(err => {
     console.log(err);

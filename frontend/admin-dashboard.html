@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard – CEMS</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #111;
+  color: white;
+  padding: 20px;
+  height: 100vh;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  background: #222;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.sidebar button:hover {
+  background: #ff4d2e;
+}
+
+/* Main */
+.main {
+  flex: 1;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+/* Cards */
+.card {
+  background: #f5f5f5;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card button {
+  margin-left: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.approve { background: green; color: white; }
+.delete { background: red; color: white; }
+h3 {
+  margin-bottom: 10px;
+}
+
+.card {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+</style>
+
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <h2>CEMS Admin</h2>
+  <button onclick="show('users')">👤 Users</button>
+  <button onclick="show('coordinators')">📋 Coordinators</button>
+  <button onclick="show('faculty')">🛡️ Faculty</button>
+  <button onclick="show('events')">📅 Events</button>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <div class="header">
+    <h2>Admin Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- USERS -->
+  <div id="users" class="section active">
+    <h3>All Users</h3>
+    <div id="usersList"></div>
+  </div>
+
+  <!-- COORDINATORS -->
+  <div id="coordinators" class="section">
+    <h3>Coordinator Requests</h3>
+    <div id="coordList"></div>
+  </div>
+
+  <!-- FACULTY -->
+  <div id="faculty" class="section">
+    <h3>Faculty Requests</h3>
+    <div id="facultyList"></div>
+  </div>
+
+  <!-- EVENTS -->
+  <div id="events" class="section">
+    <h3>All Events</h3>
+    <div id="eventsList"></div>
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:5000";
+
+// Switch section
+function show(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// Load Users
+function loadUsers() {
+  fetch(API + "/users")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("usersList");
+      list.innerHTML = "";
+
+      data.forEach(u => {
+        list.innerHTML += `
+          <div class="card">
+            ${u.name} (${u.role})
+            <button class="delete" onclick="deleteUser('${u._id}')">Delete</button>
+          </div>
+        `;
+      });
+    });
+}
+
+// Coordinator Requests
+function loadCoordinators() {
+fetch(API + "/coordinator-requests")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("coordList");
+      list.innerHTML = "";
+
+      data.forEach(u => {
+        list.innerHTML += `
+          <div class="card">
+           ${u.name} (${u.email})
+            <div>
+              <button class="approve" onclick="approveUser('${u._id}')">Approve</button>
+              <button class="delete" onclick="deleteUser('${u._id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+    });
+}
+
+// Faculty Requests
+function loadFaculty() {
+fetch(API + "/faculty-requests")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("facultyList");
+      list.innerHTML = "";
+
+      data.forEach(u => {
+        list.innerHTML += `
+          <div class="card">
+            ${u.name} (${u.email})
+            <div>
+              <button class="approve" onclick="approveUser('${u._id}')">Approve</button>
+              <button class="delete" onclick="deleteUser('${u._id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+    });
+}
+
+// Events
+function loadEvents() {
+fetch(API + "/admin-events")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("eventsList");
+      list.innerHTML = "";
+
+      data.forEach(e => {
+        list.innerHTML += `
+          <div class="card">
+           ${e.title} | ${e.category} | ${e.status}
+            <button class="delete" onclick="deleteEvent('${e._id}')">Delete</button>
+          </div>
+        `;
+      });
+    });
+}
+
+// Approve user
+function approveUser(id) {
+  fetch(API + "/approve-user/" + id, { method: "PUT" })
+    .then(() => {
+        loadUsers(); // ADD THIS
+      loadCoordinators();
+      loadFaculty();
+    });
+}
+
+// Delete user
+function deleteUser(id) {
+  fetch(API + "/delete-user/" + id, { method: "DELETE" })
+    .then(() => {
+      loadUsers();
+      loadCoordinators();
+      loadFaculty();
+    });
+}
+
+// Delete event
+function deleteEvent(id) {
+  fetch(API + "/delete-event/" + id, { method: "DELETE" })
+    .then(() => loadEvents());
+}
+
+// Logout
+function logout() {
+  sessionStorage.clear();
+  window.location.href = "login.html";
+}
+
+// Initial load
+loadUsers();
+loadCoordinators();
+loadFaculty();
+loadEvents();
+</script>
+
+</body>
+</html>

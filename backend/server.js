@@ -97,15 +97,16 @@ app.post("/register", async (req, res) => {
     }
 
     const user = new User({
-      firstName,
-      lastName,
-      name,
-      email,
-      password,
-      role,
-      usn,
-      department
-    });
+  firstName,
+  lastName,
+  name,
+  email,
+  password,
+  role: role.toLowerCase(),
+  usn,
+  department,
+  status: role.toLowerCase() === "user" ? "approved" : "pending"
+});
 
     await user.save();
 
@@ -139,19 +140,20 @@ app.post("/event-register", async (req, res) => {
 
     // Save the registration
     const registration = new Registration({
-      firstName,
-      lastName,
-      usn,
-      email,
-      department,
-      year,
-      eventId
-    });
+  firstName,
+  lastName,
+  usn,
+  email,
+  department,
+  year,
+  eventId
+});
 
-    await registration.save();
-    console.log("Registration successful for:", email);
+await registration.save();
 
-    res.send("Registration successful ✅");
+console.log("Registration successful for:", email);
+
+res.json({ message: "User Registered Successfully" });
   } catch (err) {
     console.error("Error in /event-register endpoint:", err);
     res.status(500).send("Server error");
@@ -169,7 +171,9 @@ app.post("/login", async (req, res) => {
 
     if (user.password !== password) {
       return res.json({ message: "Incorrect password" });
-    }
+    }if (user.status !== "approved") {
+  return res.json({ message: "Waiting for admin approval" });
+}
 
     // ✅ Save login record (optional)
     const loginRecord = new Login({
@@ -180,10 +184,10 @@ app.post("/login", async (req, res) => {
 
     // 🔥 IMPORTANT: send user name + role
     res.json({
-      message: "Login Successful",
-      name: user.firstName,   // 👈 THIS IS KEY
-      role: user.role.toLowerCase()
-    });
+  message: "Login Successful",
+  name: user.firstName + " " + user.lastName,
+  role: user.role.toLowerCase()
+});
 
   } catch (err) {
     console.log(err);
@@ -227,6 +231,60 @@ app.get("/all-events", async (req, res) => {
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: "Error fetching events" });
+  }
+});
+app.get("/users", async (req, res) => {
+  const users = await User.find();
+  res.json(users);
+});
+app.get("/coordinator-requests", async (req, res) => {
+  const users = await User.find({
+    role: { $in: ["coordinator", "Coordinator"] },
+    status: { $in: ["pending", "Pending"] }
+  });
+
+  console.log("COORDINATORS:", users); // 👈 ADD THIS
+
+  res.json(users);
+});
+
+app.get("/faculty-requests", async (req, res) => {
+  const users = await User.find({
+    role: { $in: ["faculty", "Faculty"] },
+    $or: [
+      { status: "pending" },
+      { status: { $exists: false } }
+    ]
+  });
+  res.json(users);
+});
+app.put("/approve-user/:id", async (req, res) => {
+  await User.findByIdAndUpdate(req.params.id, {
+    status: "approved"
+  });
+  res.send("User approved");
+});
+app.delete("/delete-user/:id", async (req, res) => {
+  await User.findByIdAndDelete(req.params.id);
+  res.send("User deleted");
+});
+app.get("/admin-events", async (req, res) => {
+  const events = await Event.find();
+  res.json(events);
+});
+app.delete("/delete-event/:id", async (req, res) => {
+  await Event.findByIdAndDelete(req.params.id);
+  res.send("Event deleted");
+});
+app.get("/event-registrations/:eventId", async (req, res) => {
+  try {
+    const registrations = await Registration.find({
+      eventId: req.params.eventId
+    });
+
+    res.json(registrations);
+  } catch (err) {
+    res.status(500).send("Error fetching registrations");
   }
 });
 app.listen(5000, () => {

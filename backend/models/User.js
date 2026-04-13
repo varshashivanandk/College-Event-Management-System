@@ -8,7 +8,11 @@ const UserSchema = new mongoose.Schema({
   password: String,
   role: String,
   usn: String,
-  department: String
+  department: String,
+  status: {
+    type: String,
+    default: "pending"
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);

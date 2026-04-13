@@ -107,6 +107,7 @@
       window.location.href = 'login.html';
     }
   });
+  const role = sessionStorage.getItem("cemsRole");
  function displayEvents(events) {
   const container = document.getElementById("eventsGrid");
 
@@ -114,8 +115,21 @@
     container.innerHTML = "<p>No approved events available</p>";
     return;
   }
+container.innerHTML = events.map(ev => {
 
-  container.innerHTML = events.map(ev => `
+  let participantBtn = "";
+
+  // ✅ ONLY coordinator can see
+  if (role === "coordinator") {
+    participantBtn = `
+      <button onclick="viewParticipants('${ev._id}')" 
+        style="margin-top:8px;padding:6px 10px;border-radius:6px;border:none;background:#222;color:#fff;cursor:pointer;">
+        👥 View Participants
+      </button>
+    `;
+  }
+
+  return `
     <div class="event-card">
       <div class="card-top">
         <span class="card-category">${ev.category}</span>
@@ -135,9 +149,12 @@
            class="card-action register-link">
            Register →
         </a>
+
+        ${participantBtn}  <!-- 👈 ADD THIS -->
       </div>
     </div>
-  `).join("");
+  `;
+}).join("");
 
   document.getElementById("eventCount").textContent =
     events.length + " event" + (events.length !== 1 ? "s" : "");
@@ -160,6 +177,29 @@ async function loadEvents() {
   }
 }
 loadEvents();
+async function viewParticipants(eventId) {
+  try {
+    const res = await fetch(`http://localhost:5000/event-registrations/${eventId}`);
+    const data = await res.json();
+
+    if (!data.length) {
+      alert("No participants yet");
+      return;
+    }
+
+    let list = "Participants:\n\n";
+
+    data.forEach(user => {
+      list += `${user.firstName} (${user.email})\n`;
+    });
+
+    alert(list);
+
+  } catch (err) {
+    console.log(err);
+    alert("Error loading participants");
+  }
+}
 </script>
 <script src="nav-auth.js"></script>
 </body>
